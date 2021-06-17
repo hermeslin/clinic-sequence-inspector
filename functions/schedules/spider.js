@@ -47,23 +47,6 @@ const onRun = async (context) => {
         // subtype,
       } = documentData;
 
-      // if (subtype === 'message_deleted' || subtype === 'message_changed') {
-      //   // client.chat.postMessage({
-      //   //   channel,
-      //   //   thread_ts: ts,
-      //   //   text: 'Message deleted',
-      //   // });
-
-      //   // delete firstResponse
-      //   await collection.doc(documentId).delete();
-      //   //
-      // const querySnapshots = await collection.where('ts', '===', ts).get();
-      //   // querySnapshots.forEach((doc) => {
-      //   //   doc.ref.delete();
-      //   // });
-      //   // return null;
-      // }
-
       if (firstResponse === false) {
         client.chat.postMessage({
           channel,

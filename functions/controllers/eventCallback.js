@@ -34,10 +34,6 @@ module.exports = async (req, res) => {
 
     const collection = db.collection('slack_events');
 
-    // console.log(JSON.stringify(event));
-    // res.status(200).send({ message: 'ok' });
-    // return;
-
     // ignore changed message
     if (event.subtype === 'message_changed') {
       res.status(200).send({ message: 'Ignore changed message' });
