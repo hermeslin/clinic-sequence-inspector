@@ -26,11 +26,10 @@ const onRun = async (context) => {
   try {
     const collection = db.collection('slack_events');
 
-    // get latest entry
+    // get messages
     const documentSnapshots = await collection.orderBy('ts').get();
 
     if (documentSnapshots.docs.length <= 0) {
-      console.log('slack_events has no data');
       return null;
     }
 
@@ -44,19 +43,7 @@ const onRun = async (context) => {
         user,
         first_response: firstResponse,
         channel,
-        // subtype,
       } = documentData;
-
-      if (firstResponse === false) {
-        client.chat.postMessage({
-          channel,
-          thread_ts: ts,
-          text: 'Start crawling..',
-        });
-
-        // update firstResponse
-        await collection.doc(documentId).update({ first_response: true });
-      }
 
       // parse doctor and sequence
       const newText = text.replace(/\*/g, '');
@@ -64,6 +51,18 @@ const onRun = async (context) => {
         return null;
       }
       const [doctor, sequence] = newText.split(':');
+
+      // send crawling message back
+      if (firstResponse === false) {
+        client.chat.postMessage({
+          channel,
+          thread_ts: ts,
+          text: 'Start crawling..',
+        });
+
+        // update first_response
+        await collection.doc(documentId).update({ first_response: true });
+      }
 
       //
       const response = await fetch(`${config.clinic.endpoint}${new Date().getTime()}`).then((res) => res.json());
@@ -80,7 +79,7 @@ const onRun = async (context) => {
         await client.chat.postMessage({
           channel,
           thread_ts: ts,
-          text: `<@${user}> doctor ${target.doctor_name} number is ${target.seq}`,
+          text: `<@${user}> Dr. ${target.doctor_name} number is ${target.seq}`,
         });
 
         // delete firestore data
@@ -98,7 +97,7 @@ const onRun = async (context) => {
 /**
  *
  */
-exports.scheduledFunction =functions.pubsub
+exports.scheduledFunction = functions.pubsub
     .schedule('every 2 minutes')
     .timeZone('Asia/Taipei')
     .onRun(onRun);

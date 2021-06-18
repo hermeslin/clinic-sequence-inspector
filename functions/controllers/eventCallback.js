@@ -32,13 +32,13 @@ module.exports = async (req, res) => {
       return;
     }
 
-    const collection = db.collection('slack_events');
-
     // ignore changed message
     if (event.subtype === 'message_changed') {
       res.status(200).send({ message: 'Ignore changed message' });
       return;
     }
+
+    const collection = db.collection('slack_events');
 
     // message deleted
     if (event.subtype === 'message_deleted') {
@@ -55,6 +55,7 @@ module.exports = async (req, res) => {
       }
       await collection.doc(previousMessage.client_msg_id).delete();
     } else {
+      // overwirte the same message
       await collection.doc(event.client_msg_id).set({
         ...event,
         first_response: false,
